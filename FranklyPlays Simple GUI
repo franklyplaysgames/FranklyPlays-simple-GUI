@@ -63,7 +63,7 @@ ESPFolder.Parent = game:GetService("CoreGui")
 
 local Library = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 local Window = Library:CreateWindow({
-    Name = "FranklyPlays simple GUI",
+    Name = "FranklyPlays Simple GUI",
     LoadingTitle = "FranklyPlays Simple GUI",
     LoadingSubtitle = "its Univesal if the game is normal",
     Theme = "Ocean",
@@ -407,14 +407,14 @@ InfoTab:CreateButton({
 })
 
 local HumanoidTab = Window:CreateTab("Humanoid")
-HumanoidTab:CreateSection("Speed")
+HumanoidTab:CreateSection("Speed & Movement")
 
-HumanoidTab:CreateSlider({
+local WSSlider = HumanoidTab:CreateSlider({
     Name = "WalkSpeed",
     Range = {0, 1000},
-    Increment = 5,
+    Increment = 1,
     Suffix = "",
-    CurrentValue = 20,
+    CurrentValue = 18,
     Flag = "WS",
     Callback = function(value)
         Settings.WalkSpeed = value
@@ -426,6 +426,18 @@ HumanoidTab:CreateSlider({
     end
 })
 
+HumanoidTab:CreateInput({
+    Name = "Set WalkSpeed",
+    PlaceholderText = "Enter number...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        local num = tonumber(Text)
+        if num then
+            WSSlider:Set(num)
+        end
+    end,
+})
+
 HumanoidTab:CreateToggle({
     Name = "Loop WalkSpeed",
     CurrentValue = false,
@@ -435,10 +447,12 @@ HumanoidTab:CreateToggle({
     end
 })
 
-HumanoidTab:CreateSlider({
+HumanoidTab:CreateSection("Jump")
+
+local JPSlider = HumanoidTab:CreateSlider({
     Name = "JumpPower",
     Range = {0, 1000},
-    Increment = 5,
+    Increment = 1,
     Suffix = "",
     CurrentValue = 50,
     Flag = "JP",
@@ -451,6 +465,18 @@ HumanoidTab:CreateSlider({
             end)
         end
     end
+})
+
+HumanoidTab:CreateInput({
+    Name = "Set JumpPower",
+    PlaceholderText = "Enter number...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        local num = tonumber(Text)
+        if num then
+            JPSlider:Set(num)
+        end
+    end,
 })
 
 HumanoidTab:CreateToggle({
@@ -499,7 +525,7 @@ local function toggleAirWalk(state)
 end
 
 HumanoidTab:CreateToggle({
-   Name = "Enable Air Walk",
+   Name = "Enable Air Walk(not fully done yet)",
    CurrentValue = false,
    Flag = "AirWalkToggle",
    Callback = function(Value)
@@ -509,10 +535,10 @@ HumanoidTab:CreateToggle({
 
 HumanoidTab:CreateSection("Gravity")
 
-HumanoidTab:CreateSlider({
+local GravitySlider = HumanoidTab:CreateSlider({
     Name = "Gravity",
     Range = {0, 1000},
-    Increment = 5,
+    Increment = 1,
     Suffix = "",
     CurrentValue = 195,
     Flag = "GR",
@@ -520,6 +546,18 @@ HumanoidTab:CreateSlider({
         Settings.Gravity = value
         Workspace.Gravity = value
     end
+})
+
+HumanoidTab:CreateInput({
+    Name = "Set Gravity",
+    PlaceholderText = "Default is 196.2...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        local num = tonumber(Text)
+        if num then
+            GravitySlider:Set(num)
+        end
+    end,
 })
 
 HumanoidTab:CreateToggle({
@@ -578,16 +616,28 @@ HumanoidTab:CreateToggle({
     end
 })
 
-HumanoidTab:CreateSlider({
+local FlySlider = HumanoidTab:CreateSlider({
     Name = "Fly Speed",
     Range = {10, 1000},
-    Increment = 5,
+    Increment = 1,
     Suffix = "",
     CurrentValue = 50,
     Flag = "FS",
     Callback = function(value)
         Settings.FlySpeed = value
     end
+})
+
+HumanoidTab:CreateInput({
+    Name = "Set Fly Speed",
+    PlaceholderText = "Enter speed...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        local num = tonumber(Text)
+        if num then
+            FlySlider:Set(num)
+        end
+    end,
 })
 
 HumanoidTab:CreateSection("Noclip")
@@ -651,6 +701,7 @@ HumanoidTab:CreateButton({
 })
 
 local EmoteTab = Window:CreateTab("Emotes")
+EmoteTab:CreateSection("R15 Emotes")
 
 local currentTrack = nil
 local listEmoteEnabled = false
@@ -1018,137 +1069,6 @@ EmoteTab:CreateButton({
     end,
 })
 
-EmoteTab:CreateSection("Custom Animations")
-
-local autoSwitch = false
-local currentTrack = nil
-local currentState = "None" 
-local idleTimer = 0
-
-local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-local hum = char:WaitForChild("Humanoid")
-local animator = hum:WaitForChild("Animator")
-
-local ID_IDLE = 110211186840347
-local ID_RUN = 118320322718866
-local ID_HERO = 114191137265065
-local ID_JUMP = 109996626521204
-local ID_SWIM = 656121399
-local ID_SIT  = 2506281703
-
-local function stopCurrent()
-    if currentTrack then
-        currentTrack:Stop(0.1)
-        currentTrack:Destroy()
-        currentTrack = nil
-    end
-end
-
-local function playNew(id, looped)
-    stopCurrent()
-    local anim = Instance.new("Animation")
-    anim.AnimationId = "rbxassetid://" .. tostring(id)
-    
-    currentTrack = animator:LoadAnimation(anim)
-    currentTrack.Priority = Enum.AnimationPriority.Action4
-    currentTrack.Looped = looped
-    currentTrack:Play(0.1)
-    
-    if char:FindFirstChild("Animate") then
-        char.Animate.Disabled = true
-    end
-    return currentTrack
-end
-
-EmoteTab:CreateToggle({
-    Name = "Enable All Auto-Animations",
-    CurrentValue = false,
-    Callback = function(v)
-        autoSwitch = v
-        if not v then
-            stopCurrent()
-            currentState = "None"
-            idleTimer = 0
-            if char:FindFirstChild("Animate") then
-                char.Animate.Disabled = false
-            end
-        end
-    end,
-})
-
-task.spawn(function()
-    while task.wait(0.1) do
-        if autoSwitch then
-            local state = hum:GetState()
-            local moving = hum.MoveDirection.Magnitude > 0
-            
-            if state == Enum.HumanoidStateType.Seated then
-                idleTimer = 0
-                if currentState ~= "Sitting" then
-                    currentState = "Sitting"
-                    playNew(ID_SIT, true)
-                end
-
-            elseif state == Enum.HumanoidStateType.Swimming then
-                idleTimer = 0
-                if currentState ~= "Swimming" then
-                    currentState = "Swimming"
-                    playNew(ID_SWIM, true)
-                end
-
-            elseif state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall then
-                idleTimer = 0
-                if currentState ~= "Jumping" then
-                    currentState = "Jumping"
-                    playNew(ID_JUMP, false)
-                end
-
-            elseif moving then
-                idleTimer = 0
-                if currentState ~= "Running" then
-                    currentState = "Running"
-                    playNew(ID_RUN, true)
-                end
-
-            else
-                if currentState ~= "Idle" and currentState ~= "Hero" then
-                    currentState = "Idle"
-                    playNew(ID_IDLE, true)
-                end
-                
-                idleTimer = idleTimer + 0.1
-                
-                if idleTimer >= 20 then
-                    idleTimer = 0
-                    currentState = "Hero"
-                    local heroTrack = playNew(ID_HERO, false)
-                    
-                    task.spawn(function()
-                        heroTrack.Stopped:Wait()
-                        if hum.MoveDirection.Magnitude == 0 and autoSwitch and currentState == "Hero" then
-                            currentState = "Idle"
-                            playNew(ID_IDLE, true)
-                        end
-                    end)
-                end
-            end
-        end
-    end
-end)
-
-EmoteTab:CreateButton({
-    Name = "Force Reset",
-    Callback = function()
-        stopCurrent()
-        currentState = "None"
-        idleTimer = 0
-        if char:FindFirstChild("Animate") then
-            char.Animate.Disabled = false
-        end
-        Rayfield:Notify({Title = "Reset", Content = "Animations cleared."})
-    end,
-})
-
 local TeleportTab = Window:CreateTab("Teleport")
 TeleportTab:CreateSection("Player")
 
@@ -1295,6 +1215,38 @@ TeleportTab:CreateButton({
            Rayfield:Notify({
                Title = "Selection Error",
                Content = "Please select a waypoint from the list first!",
+               Duration = 3
+           })
+       end
+   end,
+})
+
+TeleportTab:CreateButton({
+   Name = "Delete Selected Waypoint",
+   Callback = function()
+       if CurrentlySelected and SavedLocations[CurrentlySelected] then
+           SavedLocations[CurrentlySelected] = nil
+           
+           for i, name in ipairs(LocationNames) do
+               if name == CurrentlySelected then
+                   table.remove(LocationNames, i)
+                   break
+               end
+           end
+           
+           local finalNames = #LocationNames > 0 and LocationNames or {"No Waypoints Saved"}
+           CurrentlySelected = nil
+           TPList:Refresh(finalNames)
+           
+           Rayfield:Notify({
+               Title = "Waypoint Deleted",
+               Content = "Successfully removed the waypoint.",
+               Duration = 3
+           })
+       else
+           Rayfield:Notify({
+               Title = "Delete Error",
+               Content = "Nothing selected to delete!",
                Duration = 3
            })
        end
@@ -1547,7 +1499,7 @@ WorldTab:CreateSlider({
 WorldTab:CreateSection("X-Ray")
 
 WorldTab:CreateToggle({
-		Name = "Xray",
+		Name = "Xray (Basically makes most object translucent)",
 		CurrentValue = false,
 		Flag = "Xray",
 		Callback = function(Value)
@@ -1570,7 +1522,7 @@ WorldTab:CreateToggle({
 local InstantInteractEnabled = false
 
 WorldTab:CreateToggle({
-   Name = "Instant Proximity Prompt",
+   Name = "Instant Proximity Prompt (instant click E Key)",
    CurrentValue = false,
    Flag = "InstantInteract",
    Callback = function(Value)
@@ -1784,12 +1736,190 @@ ESPTab:CreateToggle({
     end
 })
 
-ESPTab:CreateButton({
-    Name = "Refresh ESP",
-    Callback = function()
-        UpdateESP()
+ESPTab:CreateToggle({
+    Name = "Auto Refresh ESP",
+    CurrentValue = false,
+    Flag = "AutoESP",
+    Callback = function(Value)
+        Toggles.AutoESP = Value
+        if Value then
+            task.spawn(function()
+                while Toggles.AutoESP do
+                    UpdateESP()
+                    task.wait(1)
+                end
+            end)
+        end
     end
 })
+
+local Aiming = false
+local AimPart = "Head"
+local FOVRadius = 150
+local ShowFOVCircle = false
+local TargetSpecific = false
+local SelectedTargetName = "None"
+local Smoothness = 0.25
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Thickness = 2
+FOVCircle.NumSides = 460
+FOVCircle.Transparency = 1
+FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+FOVCircle.Visible = false
+
+local function GetPlayerNames()
+    local names = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then table.insert(names, p.Name) end
+    end
+    return names
+end
+
+local function GetClosestPlayer()
+    if TargetSpecific and SelectedTargetName ~= "None" then
+        local p = Players:FindFirstChild(SelectedTargetName)
+        if p and p.Character and p.Character:FindFirstChild(AimPart) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+            local _, OnScreen = Camera:WorldToScreenPoint(p.Character[AimPart].Position)
+            if OnScreen then return p end
+        end
+        return nil
+    end
+
+    local MaximumDistance = FOVRadius
+    local Target = nil
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild(AimPart) and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            local ScreenPoint, OnScreen = Camera:WorldToScreenPoint(v.Character[AimPart].Position)
+            if OnScreen then
+                local MouseLocation = UserInputService:GetMouseLocation()
+                local VectorDistance = (Vector2.new(MouseLocation.X, MouseLocation.Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+                if VectorDistance < MaximumDistance then
+                    Target = v
+                    MaximumDistance = VectorDistance
+                end
+            end
+        end
+    end
+    return Target
+end
+
+local MainTab = Window:CreateTab("Aimbot")
+MainTab:CreateSection("It looks better in first person and it ONLY works in R15 character games")
+
+local AimbotToggle = MainTab:CreateToggle({
+    Name = "Aimbot Enabled",
+    CurrentValue = false,
+    Flag = "AimbotToggle",
+    Callback = function(Value) Aiming = Value end,
+})
+
+MainTab:CreateKeybind({
+   Name = "Aimbot Keybind",
+   CurrentKeybind = "Q",
+   Flag = "AimbotKey", 
+   Callback = function() AimbotToggle:Set(not Aiming) end,
+})
+
+MainTab:CreateSlider({
+    Name = "Smoothing Amount",
+    Range = {0.01, 0.5},
+    Increment = 0.05,
+    Suffix = " Speed",
+    CurrentValue = 0.25,
+    Callback = function(Value) 
+        Smoothness = Value 
+    end,
+})
+
+MainTab:CreateSection("Targeting Settings")
+
+MainTab:CreateToggle({
+    Name = "Target Specific Player Only",
+    CurrentValue = false,
+    Callback = function(Value) TargetSpecific = Value end,
+})
+
+local PlayerDropdown
+
+MainTab:CreateInput({
+    Name = "Search Player",
+    PlaceholderText = "Type username...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        if Text == "" then return end
+        local query = Text:lower()
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Name:lower():find(query) or (p.DisplayName and p.DisplayName:lower():find(query)) then
+                SelectedTargetName = p.Name
+                if PlayerDropdown then
+                    PlayerDropdown:Set({p.Name})
+                end
+                break
+            end
+        end
+    end,
+})
+
+PlayerDropdown = MainTab:CreateDropdown({
+    Name = "Select Target",
+    Options = GetPlayerNames(),
+    CurrentOption = {"None"},
+    MultipleOptions = false,
+    Callback = function(Option)
+        SelectedTargetName = Option[1]
+    end,
+})
+
+MainTab:CreateButton({
+    Name = "Refresh Player List",
+    Callback = function()
+        PlayerDropdown:Refresh(GetPlayerNames(), true)
+    end,
+})
+
+MainTab:CreateSection("FOV Settings")
+
+MainTab:CreateToggle({
+    Name = "Show FOV Circle",
+    CurrentValue = false,
+    Callback = function(Value) 
+        ShowFOVCircle = Value 
+    end,
+})
+
+MainTab:CreateSlider({
+    Name = "Aimbot FOV Size",
+    Range = {10, 500},
+    Increment = 10,
+    Suffix = "px",
+    CurrentValue = 150,
+    Callback = function(Value) FOVRadius = Value end,
+})
+
+RunService.RenderStepped:Connect(function()
+    if ShowFOVCircle == true then
+        FOVCircle.Visible = true
+        FOVCircle.Radius = FOVRadius
+        FOVCircle.Position = UserInputService:GetMouseLocation()
+    else
+        FOVCircle.Visible = false
+    end
+
+    if Aiming then
+        local Target = GetClosestPlayer()
+        if Target and Target.Character and Target.Character:FindFirstChild(AimPart) then
+            local TargetCFrame = CFrame.lookAt(Camera.CFrame.Position, Target.Character[AimPart].Position)
+            Camera.CFrame = Camera.CFrame:Lerp(TargetCFrame, Smoothness)
+        end
+    end
+end)
 
 local MiscTab = Window:CreateTab("Misc")
 MiscTab:CreateSection("Utility")
@@ -2046,6 +2176,6 @@ end)
 
 Library:Notify({
     Title = "Franks Simple GUI",
-    Content = "Just fused many common universal script thank for trying it out",
+    Content = "The script was made maily considering an R15 avartar",
     Duration = 5
 })
