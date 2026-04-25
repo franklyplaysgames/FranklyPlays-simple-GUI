@@ -462,6 +462,51 @@ HumanoidTab:CreateToggle({
     end
 })
 
+HumanoidTab:CreateSection("Air walk")
+
+local AirWalkEnabled = false
+local AirPart = nil
+
+local function toggleAirWalk(state)
+    AirWalkEnabled = state
+    
+    if AirWalkEnabled then
+        AirPart = Instance.new("Part")
+        AirPart.Name = "AirPlate"
+        AirPart.Size = Vector3.new(8, 1.6, 8)
+        AirPart.Transparency = 1
+        AirPart.Anchored = true
+        AirPart.CanCollide = true
+        AirPart.Parent = game.Workspace
+        
+        task.spawn(function()
+            while AirWalkEnabled and AirPart do
+                local char = game.Players.LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                
+                if hrp then
+                    AirPart.CFrame = CFrame.new(hrp.Position.X, hrp.Position.Y - 3.5, hrp.Position.Z)
+                end
+                task.wait()
+            end
+        end)
+    else
+        if AirPart then
+            AirPart:Destroy()
+            AirPart = nil
+        end
+    end
+end
+
+HumanoidTab:CreateToggle({
+   Name = "Enable Air Walk",
+   CurrentValue = false,
+   Flag = "AirWalkToggle",
+   Callback = function(Value)
+      toggleAirWalk(Value)
+   end,
+})
+
 HumanoidTab:CreateSection("Gravity")
 
 HumanoidTab:CreateSlider({
@@ -941,7 +986,6 @@ local emoteNames = {}
 for name, _ in pairs(emotes) do table.insert(emoteNames, name) end
 table.sort(emoteNames)
 
--- Assigning the dropdown to the variable EmoteDropdown
 EmoteDropdown = EmoteTab:CreateDropdown({
     Name = "Select Emote from List",
     Options = emoteNames,
